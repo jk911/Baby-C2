@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control and Command</title>
+    <style>
+        body{
+            background-color: black;
+            color:green;
+        }
+        .session{
+            margin-top:1em;
+        }
+        h3,h1{
+            margin:0;
+            padding:0
+        }
+        a{
+            text-decoration: none;
+            color:black;
+            background-color: green;
+            padding:4px;
+            border-radius: 4px 4px;
+            margin-left:3px
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to C2</h1>
+    <div id="auto">
+        <h3>There are currently {{number}} session</h3>
+        {%for i in range(number)%}
+        <div class="session">
+            Session {{i}}: {{addrs[i]}} ======>
+            <a href="http://127.0.0.1:5000/session{{i}}">Interact</a>
+            </br>
+        </div>
+        {%endfor%}
+    </div>
+</body>
+</html>
